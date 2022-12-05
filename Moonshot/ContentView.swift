@@ -6,16 +6,42 @@
 //
 
 import SwiftUI
+import Popovers
+
+enum DisplayMode: String {
+    case grid, list
+}
 
 struct ContentView: View {
+    let missions: [Mission] = Bundle.main.decode("missions.json")
+    let astronauts: [String: Astronaut] = Bundle.main.decode("astronauts.json")
+
+    @AppStorage("displayMode") private var displayMode = DisplayMode.grid
+        
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationStack {
+            Group {
+                switch(displayMode) {
+                case .grid: MissionGridView(missions: missions, astronauts: astronauts)
+                case .list: MissionListView(missions: missions, astronauts: astronauts)
+                }
+            }
+            .navigationTitle("Moonshot")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Picker(selection: $displayMode, label: Text("Sorting options")) {
+                            Label("View as Gallery", systemImage: "square.grid.2x2").tag(DisplayMode.grid)
+                            Label("View as List", systemImage: "list.bullet").tag(DisplayMode.list)
+                        }
+                    } label: {
+                        Label("Options", systemImage: "ellipsis.circle")
+                    }
+                }
+            }
+            .background(.darkBackground)
         }
-        .padding()
+        .preferredColorScheme(.dark)
     }
 }
 
